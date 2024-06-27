@@ -1,0 +1,6 @@
+numpy==1.25.2
+tensorflow==2.15.0
+azure-storage-blob==12.20.0
+flask==3.0.3
+werkzeug==3.0.3
+pillow==10.3.0
