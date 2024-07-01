@@ -47,19 +47,16 @@ def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-# Load and preprocess the image
-def load_and_preprocess_image(image_path, target_size=(224, 224)):
+# Preprocess image
+def preprocess(file, target_size=(224, 224)):
     # Load the image
-    img = Image.open(image_path)
+    img = Image.open(BytesIO(file.read()))
     # Resize the image
     img = img.resize(target_size)
     # Convert the image to numpy array
     img_array = np.array(img)
     # Normalize the image to [0, 1]
     img_array = img_array / 255.0
-
-    img_array = img_array.astype(np.float32)
     # Add batch dimension
     img_array = np.expand_dims(img_array, axis=0)
     return img_array
