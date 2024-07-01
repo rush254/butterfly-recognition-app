@@ -1,11 +1,11 @@
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet import preprocess_input
 from io import BytesIO
 import numpy as np
+import onnxruntime as ort
+import numpy as np
+from PIL import Image
 
 # Load trained model
-model = tf.keras.models.load_model('models/mobilenetv3_best.h5')
+model_path = 'models/mobilenetv3_model.onnx'
 
 # Class labels
 class_labels = ['ADONIS', 'AFRICAN GIANT SWALLOWTAIL', 'AMERICAN SNOOT', 'AN 88', 'APPOLLO', 'ATALA', 
@@ -24,15 +24,42 @@ class_labels = ['ADONIS', 'AFRICAN GIANT SWALLOWTAIL', 'AMERICAN SNOOT', 'AN 88'
                 'ULYSES', 'VICEROY', 'WOOD SATYR', 'YELLOW SWALLOW TAIL', 'ZEBRA LONG WING']
 
 
+# Predict class
+def predict_class(img_array):
+
+    # Load the ONNX model
+    ort_session = ort.InferenceSession(model_path)
+
+    # Get the input name for the ONNX model
+    input_name = ort_session.get_inputs()[0].name
+    output_name = ort_session.get_outputs()[0].name
+
+    # Run inference
+    ort_outputs = ort_session.run([output_name], {input_name: img_array})
+
+    # Get predicted class
+    predicted_label = class_labels[np.argmax(ort_outputs)]
+
+    return predicted_label
+
 # Allowed filetypes
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Process image
-def process_image(file): 
-    img = image.load_img(BytesIO(file.read()), target_size=(224, 224))
-    img_array = image.img_to_array(img)
+
+# Load and preprocess the image
+def load_and_preprocess_image(image_path, target_size=(224, 224)):
+    # Load the image
+    img = Image.open(image_path)
+    # Resize the image
+    img = img.resize(target_size)
+    # Convert the image to numpy array
+    img_array = np.array(img)
+    # Normalize the image to [0, 1]
+    img_array = img_array / 255.0
+
+    img_array = img_array.astype(np.float32)
+    # Add batch dimension
     img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)
     return img_array
