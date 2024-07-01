@@ -35,7 +35,7 @@ def predict():
         # get filename
         filename = secure_filename(file.filename)
         
-        predicted_label = predict_class(load_and_preprocess_image(image_path))
+        predicted_label = predict_class(preprocess(file))
 
         # Store the image in the 'images' folder in blob storage
         img_url = upload_image_to_blob(file.read(), filename, connect_str, container_name)
