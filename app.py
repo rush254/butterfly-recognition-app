@@ -34,10 +34,8 @@ def predict():
     if file and allowed_file(file.filename):
         # get filename
         filename = secure_filename(file.filename)
-
-        # Process and predict before storing
-        prediction = model.predict(process_image(file))
-        predicted_label = class_labels[np.argmax(prediction, axis=1)[0]]
+        
+        predicted_label = predict_class(load_and_preprocess_image(image_path))
 
         # Store the image in the 'images' folder in blob storage
         img_url = upload_image_to_blob(file.read(), filename, connect_str, container_name)
